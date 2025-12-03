@@ -1,3 +1,11 @@
+https://www.youtube.com/watch?v=N4meIif7Jtc
+
+https://github.com/giraffereactor/ref-better-auth-tut/tree/part_1
+
+https://github.com/jevontrei/yt-better-authy
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
