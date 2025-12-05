@@ -1,4 +1,7 @@
 "use server";
+
+import { auth } from "@/lib/auth";
+
 // "use server" runs this code on the server
 
 // `formData: FormData` is a type annotation
@@ -28,6 +31,14 @@ export async function signUpEmailAction(formData: FormData) {
   if (!password) return { error: "Please enter your passwrd" };
 
   try {
+    await auth.api.signUpEmail({
+      body: {
+        name,
+        email,
+        password,
+      },
+    });
+
     return { error: null };
   } catch (err) {
     // catch (err) catches EVERYTHING; so we need to check if it is an Error object or something totally different (anything can be "thrown")

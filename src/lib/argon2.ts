@@ -3,7 +3,7 @@ import { hash, verify, type Options } from "@node-rs/argon2";
 const opts: Options = {
   // learned how to do this from lucia auth
   // google ~"lucia auth set up argon2 with minimum configuration"
-  // MU: this is good because it is slow
+  // MU: this is good BECAUSE it is slow
   memoryCost: 19456,
   timeCost: 2,
   outputLen: 32,
