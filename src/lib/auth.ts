@@ -1,9 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/argon2";
+import { getValidDomains, normaliseName } from "@/lib/utils";
+
+// this file is our main better auth configuration object
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -18,6 +22,41 @@ export const auth = betterAuth({
       verify: verifyPassword,
     },
   },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      // this is a hook that runs BEFORE we get to "/sign-up/email"
+      // so if you wanna do any tweaking to the data, we can do it here
+      if (ctx.path === "/sign-up/email") {
+        const email = String(ctx.body.email);
+        const domain = email.split("@")[1];
+
+        const VALID_DOMAINS = getValidDomains();
+        if (!VALID_DOMAINS.includes(domain)) {
+          // APIError is from "better-auth/api", NOT from "better-auth"
+          throw new APIError("BAD_REQUEST", {
+            message: "Invalid domain. Please use a valid email.",
+          });
+        }
+
+        const name = normaliseName(ctx.body.name);
+
+        return {
+          context: {
+            // spread current context
+            ...ctx,
+            // replace the body by spreading ctx.body and pass in new name
+            body: {
+              ...ctx.body,
+              name,
+            },
+          },
+        };
+      }
+    }),
+  },
+  session: {
+    expiresIn: 30 * 24 * 60 * 60,
+  },
   advanced: {
     database: {
       generateId: false,
@@ -26,3 +65,6 @@ export const auth = betterAuth({
   // this is the one-liner that replaces the manual cookie setting in sign-in-email.action.ts
   plugins: [nextCookies()],
 });
+
+// make our own error type
+export type ErrorCode = keyof typeof auth.$ERROR_CODES | "UNKNOWN";

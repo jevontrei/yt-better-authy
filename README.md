@@ -1,6 +1,6 @@
 https://www.youtube.com/watch?v=N4meIif7Jtc
 
-https://github.com/giraffereactor/ref-better-auth-tut/tree/part_1
+https://github.com/giraffereactor/ref-better-auth-tut
 
 https://github.com/jevontrei/yt-better-authy
 

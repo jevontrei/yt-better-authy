@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { APIError } from "better-auth/api";
 
 // "use server" runs this code on the server
 
@@ -80,8 +81,9 @@ export async function signInEmailAction(formData: FormData) {
     return { error: null };
   } catch (err) {
     // catch (err) catches EVERYTHING; so we need to check if it is an Error object or something totally different (anything can be "thrown")
-    if (err instanceof Error) {
-      return { error: "Oopsie! Something went wrong while logging in." };
+    // APIError is from "better-auth/api", NOT from "better-auth"
+    if (err instanceof APIError) {
+      return { error: err.message };
     }
     return { error: "Internal Server Error" };
   }
