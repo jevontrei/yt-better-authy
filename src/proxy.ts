@@ -1,7 +1,8 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/profile"];
+// these are pages/routes that we want to guard; this approach may not be good if you have heaps of routes, but it works for now; and again, middleware is just the first line of defence
+const protectedRoutes = ["/profile", "/admin/dashboard"];
 
 // proxy.ts -- this is middleware that reads the cookie and redirects users if they're in the wrong place
 // so e.g. instead of seeing "unauthorised" when you visit the profile page when not logged in, you just get redirected back to the login page

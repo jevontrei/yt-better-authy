@@ -33,6 +33,8 @@ export async function signUpEmailAction(formData: FormData) {
 
   try {
     await auth.api.signUpEmail({
+      // this DID have a typescript error here but we put `input: false` in additionalFields in auth.ts
+      // The error was bc we aren't passing the role here; but we don't need to because we're using @default(USER) in the schema
       body: {
         name,
         email,
@@ -47,7 +49,7 @@ export async function signUpEmailAction(formData: FormData) {
     // and it enables us to safely use err.message
     // APIError is from "better-auth/api", NOT from "better-auth"
     if (err instanceof APIError) {
-      // typecast
+      // typecast(?)
       const errCode = err.body ? (err.body.code as ErrorCode) : "UNKNOWN";
       // he found this message / error code by logging the error and looking; i found "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
       // console.log(err);
