@@ -49,6 +49,7 @@ export async function signUpEmailAction(formData: FormData) {
     // and it enables us to safely use err.message
     // APIError is from "better-auth/api", NOT from "better-auth"
     if (err instanceof APIError) {
+      console.log(err.body);
       // typecast(?)
       const errCode = err.body ? (err.body.code as ErrorCode) : "UNKNOWN";
       // he found this message / error code by logging the error and looking; i found "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
