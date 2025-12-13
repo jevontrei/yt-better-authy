@@ -1,8 +1,9 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, ErrorCode } from "@/lib/auth";
 import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
+import { redirect } from "next/navigation";
 
 // "use server" runs this code on the server
 
@@ -83,7 +84,16 @@ export async function signInEmailAction(formData: FormData) {
     // catch (err) catches EVERYTHING; so we need to check if it is an Error object or something totally different (anything can be "thrown")
     // APIError is from "better-auth/api", NOT from "better-auth"
     if (err instanceof APIError) {
-      return { error: err.message };
+      // 4:25:49 - we are making this more verbose, because what if you lose your verification email etc, how will you get a new link??
+      const errCode = err.body ? (err.body.code as ErrorCode) : "UNKNOWN";
+
+      switch (errCode) {
+        case "EMAIL_NOT_VERIFIED":
+          // pass in a custom message (query param?) which we will catch ourselves in auth/verify/page.tsx
+          redirect("/auth/verify?error=email_not_verified");
+        default:
+          return { error: err.message };
+      }
     }
     return { error: "Internal Server Error" };
   }

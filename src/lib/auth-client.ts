@@ -13,4 +13,15 @@ const authClient = createAuthClient({
   plugins: [inferAdditionalFields<typeof auth>(), adminClient({ ac, roles })],
 });
 
-export const { signUp, signOut, signIn, useSession, admin } = authClient;
+// all these functions that we're using on the client can also be used on the server, i'm pretty sure, with `auth.api.____`, and vice versa. e.g. you could do `auth.api.sendVerificationEmail` on the server. but the client side is somewhat easier to work with (but has security tradeoffs? maybe?)
+export const {
+  signUp,
+  signOut,
+  signIn,
+  useSession,
+  admin,
+  sendVerificationEmail,
+  // forgetPassword was renamed to requestPasswordReset;  https://www.answeroverflow.com/m/1381375850582118481
+  requestPasswordReset,
+  resetPassword,
+} = authClient;

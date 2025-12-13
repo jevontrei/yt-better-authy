@@ -8,6 +8,7 @@ import { signInEmailAction } from "@/actions/sign-in-email.action";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export const LoginForm = () => {
   const [isPending, setIsPending] = useState(false);
@@ -39,7 +40,18 @@ export const LoginForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex justify-between items-center gap-2">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            // forgetPassword was renamed to requestPasswordReset;  https://www.answeroverflow.com/m/1381375850582118481
+            href="/auth/forgot-password"
+            // href="/auth/forget-password"
+            className="text-sm italic text-muted-foreground hover:text-foreground"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
         <Input type="password" id="password" name="password" />
       </div>
 

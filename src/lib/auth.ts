@@ -9,6 +9,7 @@ import { hashPassword, verifyPassword } from "@/lib/argon2";
 import { getValidDomains, normaliseName } from "@/lib/utils";
 import { UserRole } from "@prisma/client";
 import { ac, roles } from "@/lib/permissions";
+import { sendEmailAction } from "@/actions/send-email.action";
 
 // this file is our main better auth configuration object
 
@@ -35,6 +36,41 @@ export const auth = betterAuth({
     password: {
       hash: hashPassword,
       verify: verifyPassword,
+    },
+    requireEmailVerification: true,
+    // similar to sendVerificationEmail
+    sendResetPassword: async ({ user, url }) => {
+      // this is an action that WE made
+      await sendEmailAction({
+        to: user.email,
+        subject: "Reset Your Password",
+        meta: {
+          description: "Please click the link below to reset your password",
+          // don't need String() here, because url is already a string (hover over url to see)
+          link: url,
+        },
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    // we won't need expiresIn because the default is already 60 * 60 = 3600; see docs: https://www.better-auth.com/docs/reference/options#emailverification
+    // expiresIn: 60 * 60,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const link = new URL(url);
+      // callbackURL was home page; let's change it to /auth/verify
+      link.searchParams.set("callbackURL", "/auth/verify");
+
+      await sendEmailAction({
+        to: user.email,
+        subject: "Verify Your Email Address",
+        meta: {
+          description:
+            "Please verify your email address to complete registration.",
+          link: String(link),
+        },
+      });
     },
   },
   hooks: {
