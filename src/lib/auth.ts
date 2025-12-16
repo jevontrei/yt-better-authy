@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { admin } from "better-auth/plugins";
+import { admin, customSession, magicLink } from "better-auth/plugins";
 
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/argon2";
@@ -13,7 +13,10 @@ import { sendEmailAction } from "@/actions/send-email.action";
 
 // this file is our main better auth configuration object
 
-export const auth = betterAuth({
+// this is addressing the unrecognised "role" in customSession below
+// we put most of our auth config (except customSession) in this "options" object, then spread options into betterAuth() below, in order for the customSession plugin to "see" the effects of the admin plugin (i.e. to be able to see the role)
+// the "satisfies" keyword (ts, not js) allows you to check if a type satisfies a particular condition/interface
+const options = {
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -89,8 +92,6 @@ export const auth = betterAuth({
           });
         }
 
-        const name = normaliseName(ctx.body.name);
-
         return {
           context: {
             // spread current context
@@ -98,8 +99,26 @@ export const auth = betterAuth({
             // replace the body by spreading ctx.body and pass in new name
             body: {
               ...ctx.body,
-              name,
+              name: normaliseName(ctx.body.name),
             },
+          },
+        };
+      }
+
+      if (ctx.path === "/sign-in/magic-link") {
+        return {
+          context: {
+            ...ctx,
+            body: { ...ctx.body, name: normaliseName(ctx.body.name) },
+          },
+        };
+      }
+
+      if (ctx.path === "/sign-in/update-user") {
+        return {
+          context: {
+            ...ctx,
+            body: { ...ctx.body, name: normaliseName(ctx.body.name) },
           },
         };
       }
@@ -137,6 +156,11 @@ export const auth = betterAuth({
   },
   session: {
     expiresIn: 30 * 24 * 60 * 60,
+    cookieCache: {
+      enabled: true,
+      // 5 minutes (see better auth docs - caching on your cookie session)
+      maxAge: 5 * 60,
+    },
   },
   account: {
     accountLinking: {
@@ -160,6 +184,44 @@ export const auth = betterAuth({
       ac,
       roles,
     }),
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        // use our sendEmailAction that we've been using for all our other emails
+        await sendEmailAction({
+          to: email,
+          subject: "Magic Link Login",
+          meta: {
+            description: "Please click the link below to log in.",
+            link: url,
+          },
+        });
+      },
+    }),
+  ],
+} satisfies BetterAuthOptions;
+
+export const auth = betterAuth({
+  ...options,
+  plugins: [
+    ...(options.plugins ?? []),
+    customSession(async ({ user, session }) => {
+      return {
+        session: {
+          expiresAt: session.expiresAt,
+          token: session.token,
+          userAgent: session.userAgent,
+        },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          createdAt: user.createdAt,
+          // role doesn't exist here, bc the role key is added by the admin plugin, and so the customSession is unable to get the type changes based on the updated user based on the admin plugin. but there is a workaround from the better-auth docs, where we pull up the btter auth configs outside, then spread it back into better-auth
+          role: user.role,
+        },
+      };
+    }, options),
   ],
 });
 
