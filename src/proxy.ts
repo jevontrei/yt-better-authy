@@ -37,7 +37,7 @@ export async function proxy(req: NextRequest) {
   if (isOnProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
-  // if you ARE logged, you shouldn't still be on auth route; go to profile page
+  // if you ARE logged in, you shouldn't still be on auth route; go to profile page
   if (isOnAuthRoute && isLoggedIn) {
     return NextResponse.redirect(new URL("/profile", req.url));
   }

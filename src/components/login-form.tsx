@@ -10,11 +10,15 @@ import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 
+// why is this export const and not export default function?
+// -> is not much difference... it just affects named export/import etc
 export const LoginForm = () => {
+  // isPending is useful because of disabled={isPending}
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
+    // stop the browser's default behaviour, which is to reload(?)
     evt.preventDefault();
 
     setIsPending(true);
@@ -45,7 +49,6 @@ export const LoginForm = () => {
           <Link
             // forgetPassword was renamed to requestPasswordReset;  https://www.answeroverflow.com/m/1381375850582118481
             href="/auth/forgot-password"
-            // href="/auth/forget-password"
             className="text-sm italic text-muted-foreground hover:text-foreground"
           >
             Forgot password?

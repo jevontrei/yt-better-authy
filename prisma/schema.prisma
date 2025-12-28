@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  // can't use @/ here; must use ../
   // output   = "../node_modules/@prisma/client"
 }
 

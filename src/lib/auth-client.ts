@@ -28,7 +28,7 @@ const authClient = createAuthClient({
   ],
 });
 
-// all these functions that we're using on the client can also be used on the server, i'm pretty sure, with `auth.api.____`, and vice versa. e.g. you could do `auth.api.sendVerificationEmail` on the server. but the client side is somewhat easier to work with (but has security tradeoffs? maybe?)
+// all these functions that we're using on the client can also be used on the server, i'm pretty sure, with `auth.api.____`, and vice versa. E.g. you could do `auth.api.sendVerificationEmail` on the server. but the client side is somewhat easier to work with (but has security tradeoffs)
 export const {
   signUp,
   signOut,
